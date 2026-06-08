@@ -2,6 +2,10 @@
 
 An extremely versatile swipe/slide transition plugin for Kdenlive. It's designed to cover pretty much every swipe or slide-related transition.
 
+<p align="center">
+<img width="447" height="447" alt="kdenlive_PEOP4WS4SR" src="https://github.com/user-attachments/assets/da127baa-1deb-4b5d-83e6-ce7e905ab78d" />
+</p>
+
 ## Features
 
 - **Flexible per-clip directions**: Independent horizontal/vertical axis and angle (0-180°) for incoming and outgoing clips.
@@ -19,10 +23,6 @@ An extremely versatile swipe/slide transition plugin for Kdenlive. It's designed
 ## Usage
 
 - Drag the **OmniSwipe** transition onto the timeline between two clips. (A very short duration is recommended.)
-
-<img width="447" height="447" alt="kdenlive_PEOP4WS4SR" src="https://github.com/user-attachments/assets/da127baa-1deb-4b5d-83e6-ce7e905ab78d" />
-
-
 - Adjust parameters:
   - **Clip 1 Axis / Direction Angle**: Controls how the incoming clip enters.
   - **Clip 2 Axis / Direction Angle**: Controls how the outgoing clip disappears (when moving).
