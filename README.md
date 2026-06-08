@@ -1,6 +1,6 @@
 # OmniSwipe - Frei0r Transition Plugin for Kdenlive
 
-A frei0r-based, extremely versatile swipe transition plugin for Kdenlive. It's designed to cover every swipe or slide-related transitions.
+An extremely versatile swipe/slide transition plugin for Kdenlive. It's designed to cover pretty much every swipe or slide-related transition.
 
 ## Features
 
@@ -19,9 +19,13 @@ A frei0r-based, extremely versatile swipe transition plugin for Kdenlive. It's d
 ## Usage
 
 - Drag the **OmniSwipe** transition onto the timeline between two clips. (A very short duration is recommended.)
+
+<img width="447" height="447" alt="kdenlive_PEOP4WS4SR" src="https://github.com/user-attachments/assets/da127baa-1deb-4b5d-83e6-ce7e905ab78d" />
+
+
 - Adjust parameters:
   - **Clip 1 Axis / Direction Angle**: Controls how the incoming clip enters.
-  - **Clip 2 Axis / Direction Angle**: Controls how the outgoing clip disappear (when moving).
+  - **Clip 2 Axis / Direction Angle**: Controls how the outgoing clip disappears (when moving).
   - **Clip 2 Behavior**: Static / Move / Fade.
   - **Speed Curve**: Higher % = stronger acceleration.
   - **Motion Blur**: Strength of directional blur.
