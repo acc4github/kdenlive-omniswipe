@@ -8,11 +8,18 @@ An extremely versatile swipe transition plugin for Kdenlive. It's designed to co
 
 ---
 ## Features
-- **Flexible per-clip directions**: Independent horizontal/vertical axis and angle (0-180°) for incoming and outgoing clips.
-- **Carefully Designed Steps for Quick Setup**: Horizontal/Vertical options, 180° max value, etc.
-- **Background Clip behaviors**: Static, Move (slide out), or Fade.
-- **Speed Curve**: Adjustable 'linear to logarithmic' speed acceleration.
-- **Directional Motion Blur**: Realistic blur synced to movement speed and direction.
+- Flexible per-clip directions: Independent horizontal/vertical axis and angle (0-180°) for incoming and outgoing clips.
+- Carefully Designed Steps for Quick Setup: Horizontal/Vertical options, 180° max value, etc.
+- Background Clip behaviors: Static, Move (slide out), or Fade.
+- Speed Curve: Adjustable 'linear to logarithmic' speed acceleration.
+- Directional Motion Blur: Realistic blur synced to movement speed and direction.
+
+## Parameters
+- Clip 1 Axis / Direction Angle: Controls how the incoming clip enters.
+- Clip 2 Axis / Direction Angle: Controls how the outgoing clip disappears (when moving).
+- Clip 2 Behavior: Static / Move / Fade.
+- Speed Curve**: Higher % = stronger acceleration.
+- Motion Blur**: Strength of directional blur.
 
 ### Installation (Windows)
 1. Download the build from the release. The zip file should have `omni-swipe.dll` and `camerashakeorganic.xml`.
@@ -23,16 +30,9 @@ An extremely versatile swipe transition plugin for Kdenlive. It's designed to co
 ### Important Warning
 **This is NOT an official Kdenlive plugin.**  
 This is a modified third-party plugin.  
-- It may stop working after Kdenlive or Frei0r updates.
-- Not tested on all systems or versions.
-- Use at your own risk.
-
-## Parameters
-- **Clip 1 Axis / Direction Angle**: Controls how the incoming clip enters.
-- **Clip 2 Axis / Direction Angle**: Controls how the outgoing clip disappears (when moving).
-- **Clip 2 Behavior**: Static / Move / Fade.
-- **Speed Curve**: Higher % = stronger acceleration.
-- **Motion Blur**: Strength of directional blur.
+  - It may stop working after Kdenlive or Frei0r updates.
+  - Not tested on all systems or versions.
+  - Use at your own risk.
 
 ## License
 - This plugin is made by acc4commissions with assistance from Grok 4.3 (xAI). 
