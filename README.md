@@ -35,7 +35,7 @@ This is a modified third-party plugin.
   - Use at your own risk.
 
 ### Disclaimers
-- It doesn't support keyframes, but I couldn't figure out how to fix it. Since a lot of official Kdenlive plugins are broken in keyframe support, I suppose it's a bug on Kdenlive's side.
+- It doesn't support keyframe creation, but I couldn't figure out how to fix it. Since a lot of official Kdenlive plugins are broken in keyframe support, I suppose it's a bug on Kdenlive's side.
 - It's just a tiny cosmetic issue, but the thumbnail preview is not generated in Kdenlive's Docker.
 
 ## License
