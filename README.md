@@ -34,6 +34,10 @@ This is a modified third-party plugin.
   - Not tested on all systems or versions.
   - Use at your own risk.
 
+### Disclaimers
+- It doesn't support keyframes, but I couldn't figure out how to fix it. Since a lot of official Kdenlive plugins are broken in keyframe support, I suppose it's a bug on Kdenlive's side.
+- It's just a tiny cosmetic issue, but the thumbnail preview is not generated in Kdenlive's Docker.
+
 ## License
 - This plugin is made by acc4commissions with assistance from Grok 4.3 (xAI). 
 - This project is licensed under the **GNU General Public License v3.0** (GPL-3.0).
