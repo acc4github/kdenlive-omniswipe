@@ -27,14 +27,12 @@ This is a modified third-party plugin.
 - Not tested on all systems or versions.
 - Use at your own risk.
 
-## Usage
-- Drag the **OmniSwipe** transition onto the timeline between two clips. (A very short duration is recommended.)
-- Adjust parameters:
-  - **Clip 1 Axis / Direction Angle**: Controls how the incoming clip enters.
-  - **Clip 2 Axis / Direction Angle**: Controls how the outgoing clip disappears (when moving).
-  - **Clip 2 Behavior**: Static / Move / Fade.
-  - **Speed Curve**: Higher % = stronger acceleration.
-  - **Motion Blur**: Strength of directional blur.
+## Parameters
+- **Clip 1 Axis / Direction Angle**: Controls how the incoming clip enters.
+- **Clip 2 Axis / Direction Angle**: Controls how the outgoing clip disappears (when moving).
+- **Clip 2 Behavior**: Static / Move / Fade.
+- **Speed Curve**: Higher % = stronger acceleration.
+- **Motion Blur**: Strength of directional blur.
 
 ## License
 - This plugin is made by acc4commissions with assistance from Grok 4.3 (xAI). 
