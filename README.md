@@ -8,8 +8,8 @@ An extremely versatile swipe transition plugin for Kdenlive. It's designed to co
 
 ---
 ## Features
-- Flexible per-clip directions: Independent horizontal/vertical axis and angle (0-180°) for incoming and outgoing clips.
-- Carefully Designed Steps for Quick Setup: Horizontal/Vertical options, 180° max value, etc.
+- Flexible per-clip directions: Independent axis and angle (0-180°) for incoming and outgoing clips.
+- Carefully Designed Steps for Quick Setup: +0/+90+180 Angle steps, 180° max wheel value, etc.
 - Background Clip behaviors: Static, Move (slide out), or Fade.
 - Speed Curve: Adjustable 'linear to logarithmic' speed acceleration.
 - Directional Motion Blur: Realistic blur synced to movement speed and direction.
