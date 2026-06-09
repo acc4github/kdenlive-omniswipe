@@ -3,7 +3,9 @@
 An extremely versatile swipe transition plugin for Kdenlive. It's designed to cover pretty much every swipe or slide-related transition.
 
 <p align="center">
-<img width="447" height="447" alt="kdenlive_PEOP4WS4SR" src="https://github.com/user-attachments/assets/da127baa-1deb-4b5d-83e6-ce7e905ab78d" />
+
+<img width="447" height="404" alt="kdenlive_b3yWCnnllB" src="https://github.com/user-attachments/assets/4bef2d51-d513-463d-b65c-f1da5736573e" />
+
 </p>
 
 ---
@@ -11,7 +13,7 @@ An extremely versatile swipe transition plugin for Kdenlive. It's designed to co
 - Flexible per-clip directions: Independent axis and angle (0-180°) for incoming and outgoing clips.
 - Carefully Designed Steps for Quick Setup: +0/+90+180 Angle steps, 180° max wheel value, etc.
 - Background Clip behaviors: Static, Move (slide out), or Fade.
-- Speed Curve: Adjustable 'linear to logarithmic' speed acceleration.
+- Speed Curve: Adjustable 'linear to logarithmic' speed acceleration for a dynamic swiping.
 - Directional Motion Blur: Realistic blur synced to movement speed and direction.
 
 ## Parameters
