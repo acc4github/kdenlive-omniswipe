@@ -3,27 +3,28 @@
 <transition tag="frei0r.omni-swipe" id="frei0r.omni-swipe" type="videotransition">
     <name>OmniSwipe</name>
     <description>A Swiss Army knife for swipe and slide transitions.</description>
+    <author>acc4commissions and Grok 4.3</author>
 
     <parameter type="animated" name="position" max="1000" min="0" default="0=0;%out=1" factor="1000">
         <name>Swipe position (progress)</name>
     </parameter>
 
-    <parameter type="list" name="axis1" default="0" paramlist="0;1">
+    <parameter type="list" name="axis1" default="0" paramlist="0;1;2">
         <name>Clip 1 Axis</name>
-        <paramlistdisplay>Horizontal,Vertical</paramlistdisplay>
+        <paramlistdisplay>+0,+90,+180</paramlistdisplay>
     </parameter>
 
     <parameter type="double" name="direction_angle1" max="180" min="0" default="0">
-        <name>Clip 1 Direction Angle</name>
+        <name>Clip 1 Axis Wheel</name>
     </parameter>
 
-    <parameter type="list" name="axis2" default="0" paramlist="0;1">
+    <parameter type="list" name="axis2" default="0" paramlist="0;1;2">
         <name>Clip 2 Axis</name>
-        <paramlistdisplay>Horizontal,Vertical</paramlistdisplay>
+        <paramlistdisplay>+0,+90,+180</paramlistdisplay>
     </parameter>
 
     <parameter type="double" name="direction_angle2" max="180" min="0" default="180">
-        <name>Clip 2 Direction Angle</name>
+        <name>Clip 2 Axis Wheel</name>
     </parameter>
 
     <parameter type="list" name="clip2behavior" default="1" paramlist="0;1;2">
