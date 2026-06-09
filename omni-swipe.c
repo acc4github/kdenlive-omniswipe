@@ -2,8 +2,6 @@
 #include <stdint.h>
 #include <frei0r.h>
 #include <math.h>
-#include <xmmintrin.h>
-#include <emmintrin.h>
 
 /* Main plugin instance structure */
 typedef struct {
@@ -183,80 +181,6 @@ static uint32_t sample_blurred(const uint32_t *f, int w, int h, int x, int y, do
     return 0;
 }
 
-/* ====================== SIMD HELPERS ====================== */
-
-/* Fast SIMD copy of shifted row (clip2 incoming) */
-static inline void simd_copy_shifted(uint32_t *dst, const uint32_t *src, int w, int shift, int y, int h) {
-    int row = y * w;
-    __m128i zero = _mm_setzero_si128();
-    int x = 0;
-    for (; x + 4 <= w; x += 4) {
-        int sx = x + shift;
-        __m128i v;
-        if (sx >= 0 && sx + 3 < w) {
-            v = _mm_loadu_si128((__m128i*)(src + row + sx));
-        } else {
-            v = zero;
-            for (int k = 0; k < 4; ++k) {
-                int px = sx + k;
-                ((uint32_t*)&v)[k] = get_pixel_safe(src, w, h, px, y);
-            }
-        }
-        _mm_storeu_si128((__m128i*)(dst + row + x), v);
-    }
-    for (; x < w; ++x) {
-        dst[row + x] = get_pixel_safe(src, w, h, x + shift, y);
-    }
-}
-
-/* Composite clip1 over zero pixels from clip2 (SIMD where possible) */
-static inline void simd_composite_clip1(uint32_t *out, const uint32_t *in1, int w, int h, int y,
-                                        int shift2, int clip2_behavior, double p) {
-    int row = y * w;
-    __m128i zero = _mm_setzero_si128();
-    int x = 0;
-    for (; x + 4 <= w; x += 4) {
-        __m128i vout = _mm_loadu_si128((__m128i*)(out + row + x));
-        __m128i mask = _mm_cmpeq_epi32(vout, zero);
-
-        __m128i v1 = zero;
-        if (clip2_behavior == 0) {
-            v1 = _mm_loadu_si128((__m128i*)(in1 + row + x));
-        } else if (clip2_behavior == 1) {
-            int sx = x + shift2;
-            if (sx >= 0 && sx + 3 < w) {
-                v1 = _mm_loadu_si128((__m128i*)(in1 + row + sx));
-            } else {
-                v1 = zero;
-                for (int k = 0; k < 4; ++k) {
-                    ((uint32_t*)&v1)[k] = get_pixel_safe(in1, w, h, sx + k, y);
-                }
-            }
-        } else {
-            /* Fade behavior */
-            __m128i orig = _mm_loadu_si128((__m128i*)(in1 + row + x));
-            v1 = orig;  /* TODO: vectorized fade if performance critical */
-        }
-
-        __m128i result = _mm_or_si128(_mm_andnot_si128(mask, vout), _mm_and_si128(mask, v1));
-        _mm_storeu_si128((__m128i*)(out + row + x), result);
-    }
-    /* Scalar cleanup for remainder pixels */
-    for (; x < w; ++x) {
-        if (out[row + x] == 0) {
-            uint32_t px = 0;
-            if (clip2_behavior == 0) {
-                px = in1[row + x];
-            } else if (clip2_behavior == 1) {
-                px = get_pixel_safe(in1, w, h, x + shift2, y);
-            } else {
-                px = fade_pixel(in1[row + x], 1.0 - p);
-            }
-            out[row + x] = px;
-        }
-    }
-}
-
 /* ====================== MAIN RENDER ====================== */
 static void apply_swipe(omni_swipe_t *inst, uint32_t *out, const uint32_t *in1, const uint32_t *in2, double linear_p) {
     int w = inst->width, h = inst->height;
@@ -270,40 +194,48 @@ static void apply_swipe(omni_swipe_t *inst, uint32_t *out, const uint32_t *in1, 
     double ext1 = w*fabs(dx1) + h*fabs(dy1);
     double ext2 = w*fabs(dx2) + h*fabs(dy2);
 
-    /* ==================== FAST HORIZONTAL SIMD ==================== */
+    /* ==================== FAST HORIZONTAL (scalar for stability) ==================== */
     if (blur <= 0.6 && fabs(dy1) < 0.02 && fabs(dy2) < 0.02) {
         int shift1 = (int)((1-p)*ext1*dx1 + 0.5);
         int shift2 = (int)(p*ext2*dx2 + 0.5);
 
         for (int y = 0; y < h; ++y) {
-            simd_copy_shifted(out, in2, w, shift1, y, h);
-            simd_composite_clip1(out, in1, w, h, y, shift2, inst->clip2_behavior, p);
+            int row = y * w;
+            for (int x = 0; x < w; ++x) {
+                uint32_t px = get_pixel_safe(in2, w, h, x + shift1, y);
+                if (px == 0) {
+                    if (inst->clip2_behavior == 0)
+                        px = in1[row + x];
+                    else if (inst->clip2_behavior == 1)
+                        px = get_pixel_safe(in1, w, h, x + shift2, y);
+                    else
+                        px = fade_pixel(in1[row + x], 1.0 - p);
+                }
+                out[row + x] = px;
+            }
         }
         return;
     }
 
-    /* ==================== FAST VERTICAL SIMD ==================== */
+    /* ==================== FAST VERTICAL (scalar for stability) ==================== */
     if (blur <= 0.6 && fabs(dx1) < 0.02 && fabs(dx2) < 0.02) {
         int shift1 = (int)((1-p)*ext1*dy1 + 0.5);
         int shift2 = (int)(p*ext2*dy2 + 0.5);
 
         for (int y = 0; y < h; ++y) {
             int row = y * w;
-            int x = 0;
-            __m128i zero = _mm_setzero_si128();
-            for (; x + 4 <= w; x += 4) {
-                __m128i v = zero;
-                int sy = y + shift1;
-                for (int k = 0; k < 4; ++k) {
-                    ((uint32_t*)&v)[k] = get_pixel_safe(in2, w, h, x + k, sy);
+            for (int x = 0; x < w; ++x) {
+                uint32_t px = get_pixel_safe(in2, w, h, x, y + shift1);
+                if (px == 0) {
+                    if (inst->clip2_behavior == 0)
+                        px = in1[row + x];
+                    else if (inst->clip2_behavior == 1)
+                        px = get_pixel_safe(in1, w, h, x, y + shift2);
+                    else
+                        px = fade_pixel(in1[row + x], 1.0 - p);
                 }
-                _mm_storeu_si128((__m128i*)(out + row + x), v);
+                out[row + x] = px;
             }
-            for (; x < w; ++x) {
-                out[row + x] = get_pixel_safe(in2, w, h, x, y + shift1);
-            }
-
-            simd_composite_clip1(out, in1, w, h, y, shift2, inst->clip2_behavior, p);
         }
         return;
     }
