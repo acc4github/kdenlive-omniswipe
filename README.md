@@ -27,9 +27,9 @@ An extremely versatile swipe transition plugin for Kdenlive. It's designed to co
 
 - Drag the **OmniSwipe** transition onto the timeline between two clips. (A very short duration is recommended.)
 - Adjust parameters:
-  - **Clip 1 Axis / Direction Angle**: Controls how the incoming clip enters.
-  - **Clip 2 Axis / Direction Angle**: Controls how the outgoing clip disappears (when moving).
-  - **Clip 2 Behavior**: Static / Move / Fade.
+  - **Clip 1 Axis / Wheel**: Controls the angle for the incoming clip.
+  - **Clip 2 Axis / Direction Angle**: Controls the angle for the outgoing clip (when moving).
+  - **Clip 2 Behavior**: Controls how the outgoing clip disappears -> Static / Move / Fade.
   - **Speed Curve**: Higher % = stronger acceleration.
   - **Gentle Arrival**: Higher % = stronger deceleration.
   - **Motion Blur**: Strength of directional blur.
