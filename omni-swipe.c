@@ -3,39 +3,37 @@
 #include <frei0r.h>
 #include <math.h>
 
-/* LUT resolution - higher value = smoother curve at the cost of tiny memory */
+/* LUT resolution - higher = smoother curves, but uses more memory (still tiny) */
 #define CURVE_LUT_SIZE 2048
 
 /* ====================== PLUGIN INSTANCE STRUCTURE ====================== */
+/* Holds all state for one transition instance */
 typedef struct {
-    int width, height;                    /* Video frame size */
+    int width, height;                    /* Frame dimensions from Kdenlive */
 
-    /* Main parameters */
-    double position;                      /* Transition progress (0.0 - 1.0) */
-    int clip1_axis, clip2_axis;           /* Base axis: 0=0°, 1=90°, 2=180° */
+    /* Main parameters (mirrors XML order) */
+    double position;                      /* Transition progress 0.0 â†’ 1.0 */
+    int clip1_axis, clip2_axis;           /* 0=0Â°, 1=90Â°, 2=180Â° base direction */
     int clip2_behavior;                   /* 0=Static, 1=Move, 2=Fade */
-    double clip1_angle, clip2_angle;      /* Fine angle adjustment */
+    double clip1_angle, clip2_angle;      /* Fine angle adjustment (0-180) */
 
-    /* Curve controls */
-    double speed_curve;                   /* Main acceleration curve (0-100) */
-    double gentle_arrival;                /* Ease-out strength at the end (0-100) */
-    double motion_blur;                   /* Motion blur intensity (0-100) */
+    /* Curve & effect controls */
+    double speed_curve;                   /* 0 = linear, >0 = power curve acceleration */
+    double gentle_arrival;                /* Ease-out strength at end (0-100) */
+    double motion_blur;                   /* Blur intensity (0-100) */
 
-    /* Precomputed lookup table for speed curve */
+    /* Precomputed lookup table for fast curve evaluation */
     double curve_lut[CURVE_LUT_SIZE];
-    double last_speed_curve;              /* Used to detect changes and rebuild LUT */
+    double last_speed_curve;              /* Tracks changes to rebuild LUT only when needed */
 } omni_swipe_t;
 
-/* Forward declaration */
-static void apply_swipe(omni_swipe_t *inst, uint32_t *out,
-                        const uint32_t *in1, const uint32_t *in2,
-                        double linear_progress);
-
 /* ====================== FREI0R PLUGIN INTERFACE ====================== */
+/* Standard Frei0r entry points called by Kdenlive */
+
 int f0r_init() { return 1; }
 void f0r_deinit() {}
 
-/* Plugin information shown in Kdenlive */
+/* Plugin metadata shown in Kdenlive effects list */
 void f0r_get_plugin_info(f0r_plugin_info_t *info) {
     info->name = "OmniSwipe";
     info->author = "acc4commissions and Grok 4.3";
@@ -47,7 +45,7 @@ void f0r_get_plugin_info(f0r_plugin_info_t *info) {
     info->explanation = "A Swiss Army knife for swipe and slide transitions.";
 }
 
-/* Parameter list - must match XML order exactly */
+/* Parameter metadata - MUST match XML slider order exactly */
 void f0r_get_param_info(f0r_param_info_t *info, int idx) {
     const char* names[9] = {"position", "axis1", "direction_angle1", "axis2", "direction_angle2",
                             "clip2behavior", "speed_curve", "gentle_arrival", "motion_blur"};
@@ -67,21 +65,24 @@ void f0r_get_param_info(f0r_param_info_t *info, int idx) {
     info->explanation = expl[idx];
 }
 
-/* Create / Destroy instance */
+/* ====================== INSTANCE LIFECYCLE ====================== */
+
+/* Called when transition is created */
 f0r_instance_t f0r_construct(unsigned int w, unsigned int h) {
     omni_swipe_t *inst = calloc(1, sizeof(omni_swipe_t));
     if (inst) {
         inst->width = w; inst->height = h;
         inst->clip2_behavior = 1;      /* Default: Move */
-        inst->clip2_angle = 180.0;
-        inst->gentle_arrival = 0.0;
+        inst->clip2_angle = 180.0;     /* Default opposite direction */
         inst->last_speed_curve = -1.0; /* Force LUT rebuild on first frame */
     }
     return (f0r_instance_t)inst;
 }
 void f0r_destruct(f0r_instance_t i) { free(i); }
 
-/* ====================== PARAMETER SET / GET ====================== */
+/* ====================== PARAMETER HANDLING ====================== */
+/* Kdenlive calls these when user moves sliders */
+
 void f0r_set_param_value(f0r_instance_t i, f0r_param_t p, int idx) {
     omni_swipe_t *inst = (omni_swipe_t*)i;
     double v = *(double*)p;
@@ -114,17 +115,17 @@ void f0r_get_param_value(f0r_instance_t i, f0r_param_t p, int idx) {
     }
 }
 
-/* ====================== SPEED CURVE SYSTEM ====================== */
+/* ====================== CURVE SYSTEM (PROGRESS MAPPING) ====================== */
 
-/* Build LUT for the power curve (called only when speed_curve changes) */
+/* Build lookup table for power curve (only when speed_curve changes) */
 static void build_curve_lut(omni_swipe_t *inst) {
     double c = inst->speed_curve;
     if (c <= 0.0) {
-        for (int i = 0; i < CURVE_LUT_SIZE; ++i) {
+        /* Linear case */
+        for (int i = 0; i < CURVE_LUT_SIZE; ++i)
             inst->curve_lut[i] = i / (double)(CURVE_LUT_SIZE - 1);
-        }
     } else {
-        /* Continuous power curve even at 100% (exponent = 9.0 at max) */
+        /* Exponential/power curve */
         double exp_val = 1.0 + (c / 100.0) * 8.0;
         for (int i = 0; i < CURVE_LUT_SIZE; ++i) {
             double t = i / (double)(CURVE_LUT_SIZE - 1);
@@ -134,7 +135,7 @@ static void build_curve_lut(omni_swipe_t *inst) {
     inst->last_speed_curve = c;
 }
 
-/* Fast lookup with linear interpolation */
+/* Fast interpolated lookup from LUT */
 static double curve_lookup(const double *lut, double t) {
     if (t <= 0.0) return 0.0;
     if (t >= 1.0) return 1.0;
@@ -145,58 +146,51 @@ static double curve_lookup(const double *lut, double t) {
     return lut[i] * (1.0 - frac) + lut[i + 1] * frac;
 }
 
-static double main_curve(omni_swipe_t *inst, double t) {
-    return curve_lookup(inst->curve_lut, t);
+/* Gentle Arrival when Speed Curve = 0%: fast start + logarithmic slowdown */
+static double reversed_linear(omni_swipe_t *inst, double t) {
+    double strength = 1.0 + (inst->gentle_arrival / 100.0) * 7.0;
+    return 1.0 - pow(1.0 - t, strength);
 }
 
-/* Reversed curve for Gentle Arrival */
-static double reversed_curve(omni_swipe_t *inst, double t) {
-    if (inst->speed_curve <= 0.0) {
-        /* Independent ease-out when Speed Curve = 0% */
-        double strength = 1.0 + (inst->gentle_arrival / 100.0) * 7.0;
-        return 1.0 - pow(1.0 - t, strength);
-    }
-    /* Symmetric mirror of the main Speed Curve */
-    return 1.0 - curve_lookup(inst->curve_lut, 1.0 - t);
-}
-
-/* Main progress calculation */
-static double apply_progress(omni_swipe_t *inst, double p) {
+/* Unified progress calculator - core of all easing logic */
+static double get_progress(omni_swipe_t *inst, double p) {
     if (p <= 0.0) return 0.0;
     if (p >= 1.0) return 1.0;
+
+    /* Rebuild LUT only when speed_curve changed */
+    if (fabs(inst->speed_curve - inst->last_speed_curve) > 0.0001)
+        build_curve_lut(inst);
+
     if (inst->gentle_arrival <= 0.001)
-        return main_curve(inst, p);
+        return curve_lookup(inst->curve_lut, p);   /* No easing */
 
+    if (inst->speed_curve <= 0.0)
+        return reversed_linear(inst, p);           /* Full-range ease-out */
+
+    /* Curved speed + gentle tail zone */
     double g = inst->gentle_arrival / 100.0;
+    double main_end = 1.0 - g;
 
-    if (inst->speed_curve <= 0.0) {
-        /* Full reverse curve mode */
-        return reversed_curve(inst, p);
-    }
+    if (p <= main_end)
+        return main_end * curve_lookup(inst->curve_lut, p / main_end);
 
-    /* Hybrid mode: main curve + gentle arrival zone */
-    double zone = g;
-    double main_end = 1.0 - zone;
-
-    if (p <= main_end) {
-        return main_end * main_curve(inst, p / main_end);
-    }
-
-    double zone_t = (p - main_end) / zone;
-    double eased_zone = reversed_curve(inst, zone_t);
-    return main_end + eased_zone * zone;
+    double zone_t = (p - main_end) / g;
+    double eased = 1.0 - curve_lookup(inst->curve_lut, 1.0 - zone_t);
+    return main_end + eased * g;
 }
 
-/* Numerical derivative for motion blur */
+/* Approximate instantaneous speed for motion blur */
 static double get_instant_speed(omni_swipe_t *inst, double p) {
     if (p <= 0.0 || p >= 1.0) return 0.0;
     double eps = 0.0005;
-    double p1 = apply_progress(inst, p);
-    double p2 = apply_progress(inst, p + eps);
+    double p1 = get_progress(inst, p);
+    double p2 = get_progress(inst, p + eps);
     return (p2 - p1) / eps * 0.55;
 }
 
 /* ====================== GEOMETRY & PIXEL HELPERS ====================== */
+
+/* Convert axis + angle to movement vector (dx, dy) */
 static void get_clip_vector(int axis, double ang, double *dx, double *dy) {
     double base = axis * 90.0;
     double rad = fmod(base + ang, 360.0) * M_PI / 180.0;
@@ -218,17 +212,18 @@ static inline uint32_t fade_pixel(uint32_t px, double f) {
     return (a<<24) | (r<<16) | (g<<8) | b;
 }
 
+/* Simplified directional motion blur */
 static uint32_t sample_blurred(const uint32_t *f, int w, int h, int x, int y, double dx, double dy, double amt) {
     if (amt <= 0.6) return get_pixel_safe(f, w, h, x, y);
-    int steps = (int)(amt * 0.08) + 1; if (steps > 6) steps = 6;
+    int steps = 3;
     double r=0,g=0,b=0,a=0,tot=0;
+    double step_size = amt / steps;
     for (int i = -steps; i <= steps; ++i) {
-        double t = (double)i / (steps + 0.5);
-        int sx = x + (int)(t * amt * dx + (t>=0?0.5:-0.5));
-        int sy = y + (int)(t * amt * dy + (t>=0?0.5:-0.5));
+        int sx = x + (int)(i * step_size * dx);
+        int sy = y + (int)(i * step_size * dy);
         if (sx>=0 && sx<w && sy>=0 && sy<h) {
             uint32_t px = f[sy*w + sx];
-            double wt = 1 - fabs(t)*0.65;
+            double wt = 1.0 - fabs(i) * 0.25;
             r += ((px>>16)&0xFF)*wt; g += ((px>>8)&0xFF)*wt;
             b += (px&0xFF)*wt; a += ((px>>24)&0xFF)*wt; tot += wt;
         }
@@ -241,87 +236,61 @@ static uint32_t sample_blurred(const uint32_t *f, int w, int h, int x, int y, do
 }
 
 /* ====================== MAIN RENDER FUNCTION ====================== */
+/* Called every frame by Kdenlive */
 static void apply_swipe(omni_swipe_t *inst, uint32_t *out, const uint32_t *in1, const uint32_t *in2, double linear_p) {
-    /* Rebuild LUT only when needed */
-    if (fabs(inst->speed_curve - inst->last_speed_curve) > 0.0001) {
-        build_curve_lut(inst);
-    }
-
     int w = inst->width, h = inst->height;
-    double p = apply_progress(inst, linear_p);           /* Final eased progress */
-    double blur = inst->motion_blur * 0.085 * get_instant_speed(inst, linear_p);
+    double p = get_progress(inst, linear_p);                    /* Apply all easing */
+    double blur_amt = inst->motion_blur * 0.085 * get_instant_speed(inst, linear_p);
 
-    double dx1,dy1,dx2,dy2;
+    double dx1, dy1, dx2, dy2;
     get_clip_vector(inst->clip1_axis, inst->clip1_angle, &dx1, &dy1);
     get_clip_vector(inst->clip2_axis, inst->clip2_angle, &dx2, &dy2);
 
-    double ext1 = w*fabs(dx1) + h*fabs(dy1);
-    double ext2 = w*fabs(dx2) + h*fabs(dy2);
+    double ext1 = w * fabs(dx1) + h * fabs(dy1);   /* Max travel distance for Clip1 */
+    double ext2 = w * fabs(dx2) + h * fabs(dy2);
 
-    /* Fast paths for pure horizontal / vertical movement */
-    if (blur <= 0.6 && fabs(dy1) < 0.02 && fabs(dy2) < 0.02) {  /* Horizontal */
-        int shift1 = (int)((1-p)*ext1*dx1 + 0.5);
-        int shift2 = (int)(p*ext2*dx2 + 0.5);
-        for (int y = 0; y < h; ++y) {
-            int row = y * w;
-            for (int x = 0; x < w; ++x) {
-                uint32_t px = get_pixel_safe(in2, w, h, x + shift1, y);
-                if (px == 0) {
-                    if (inst->clip2_behavior == 0) px = in1[row + x];
-                    else if (inst->clip2_behavior == 1) px = get_pixel_safe(in1, w, h, x + shift2, y);
-                    else px = fade_pixel(in1[row + x], 1.0 - p);
-                }
-                out[row + x] = px;
-            }
-        }
-        return;
-    }
+    double off1 = (1.0 - p) * ext1;   /* Clip1 exiting offset */
+    double off2 = p * ext2;           /* Clip2 entering offset */
 
-    if (blur <= 0.6 && fabs(dx1) < 0.02 && fabs(dx2) < 0.02) {  /* Vertical */
-        int shift1 = (int)((1-p)*ext1*dy1 + 0.5);
-        int shift2 = (int)(p*ext2*dy2 + 0.5);
-        for (int y = 0; y < h; ++y) {
-            int row = y * w;
-            for (int x = 0; x < w; ++x) {
-                uint32_t px = get_pixel_safe(in2, w, h, x, y + shift1);
-                if (px == 0) {
-                    if (inst->clip2_behavior == 0) px = in1[row + x];
-                    else if (inst->clip2_behavior == 1) px = get_pixel_safe(in1, w, h, x, y + shift2);
-                    else px = fade_pixel(in1[row + x], 1.0 - p);
-                }
-                out[row + x] = px;
-            }
-        }
-        return;
-    }
-
-    /* General case: any angle + motion blur */
-    double off1 = (1-p) * ext1;
-    double off2 = p * ext2;
     for (int y = 0; y < h; ++y) {
-        int bsx1 = (int)(off1*dx1 + 0.5);
-        int bsy1 = (int)(off1*dy1 + 0.5) + y;
-        int bsx2 = (int)(off2*dx2 + 0.5);
-        int bsy2 = (int)(off2*dy2 + 0.5) + y;
         int row = y * w;
+        int bsx1 = (int)(off1 * dx1 + 0.5);
+        int bsy1 = (int)(off1 * dy1 + 0.5) + y;
+        int bsx2 = (int)(off2 * dx2 + 0.5);
+        int bsy2 = (int)(off2 * dy2 + 0.5) + y;
+
         for (int x = 0; x < w; ++x) {
-            uint32_t px = (blur > 0.6) ? sample_blurred(in2,w,h, bsx1+x, bsy1, dx1,dy1,blur)
-                                       : get_pixel_safe(in2,w,h, bsx1+x, bsy1);
-            if (px == 0) {
-                if (inst->clip2_behavior == 0)
-                    px = (blur > 0.6) ? sample_blurred(in1,w,h,x,y,0,0,blur) : in1[row+x];
-                else if (inst->clip2_behavior == 1)
-                    px = (blur > 0.6) ? sample_blurred(in1,w,h, bsx2+x, bsy2, dx2,dy2,blur)
-                                      : get_pixel_safe(in1,w,h, bsx2+x, bsy2);
-                else
-                    px = fade_pixel( (blur > 0.6 ? sample_blurred(in1,w,h,x,y,0,0,blur) : in1[row+x]) , 1.0 - p);
+            /* Hybrid coverage test (original logic) */
+            int sx = bsx1 + x;
+            int sy = bsy1;
+            uint32_t coverage = get_pixel_safe(in2, w, h, sx, sy);
+
+            uint32_t px;
+            if (coverage != 0) {
+                /* Clip 2 is visible here */
+                px = sample_blurred(in2, w, h, sx, sy, dx1, dy1, blur_amt);
+            } else {
+                /* Fallback to Clip 1 based on behavior */
+                if (inst->clip2_behavior == 0) {
+                    /* Static: Clip1 doesn't move */
+                    px = sample_blurred(in1, w, h, x, y, 0, 0, blur_amt);
+                } else if (inst->clip2_behavior == 1) {
+                    /* Move: Clip1 slides with its own vector */
+                    int sx1 = bsx2 + x;
+                    int sy1 = bsy2;
+                    px = sample_blurred(in1, w, h, sx1, sy1, dx2, dy2, blur_amt);
+                } else {
+                    /* Fade: Cross-dissolve */
+                    uint32_t base = sample_blurred(in1, w, h, x, y, 0, 0, blur_amt);
+                    px = fade_pixel(base, 1.0 - p);
+                }
             }
             out[row + x] = px;
         }
     }
 }
 
-/* ====================== FREI0R UPDATE ====================== */
+/* ====================== FREI0R UPDATE ENTRY POINT ====================== */
 void f0r_update2(f0r_instance_t i, double time, const uint32_t *in1, const uint32_t *in2,
                  const uint32_t *in3, uint32_t *out) {
     omni_swipe_t *inst = (omni_swipe_t*)i;
