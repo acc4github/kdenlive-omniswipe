@@ -36,6 +36,10 @@
         <name>Speed Curve (%)</name>
     </parameter>
 
+        <parameter type="double" name="gentle_arrival" max="100" min="0" default="0">
+        <name>Gentle Arrival (%)</name>
+    </parameter>
+
     <parameter type="double" name="motion_blur" max="100" min="0" default="0">
         <name>Motion Blur (%)</name>
     </parameter>
