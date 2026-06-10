@@ -31,6 +31,7 @@ An extremely versatile swipe transition plugin for Kdenlive. It's designed to co
   - **Clip 2 Axis / Direction Angle**: Controls how the outgoing clip disappears (when moving).
   - **Clip 2 Behavior**: Static / Move / Fade.
   - **Speed Curve**: Higher % = stronger acceleration.
+  - **Gentle Arrival**: Higher % = stronger deceleration.
   - **Motion Blur**: Strength of directional blur.
 
 ## License
