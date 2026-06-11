@@ -11,13 +11,16 @@ An extremely versatile swipe transition plugin for Kdenlive. It's designed to co
 ---
 ## Features
 
-- **Flexible per-clip directions**: Independent horizontal/vertical axis and angle (0-180°) for incoming and outgoing clips.
-- **Carefully Designed Steps for Quick Setup**: Horizontal/Vertical options, 180° max value, etc.
-- **Background Clip behaviors**: Static, Move (slide out), or Fade.
-- **Speed Curve and Gentle Arrival**: Adjustable 'linear to logarithmic' speed acceleration/deceleration.
-- **Directional Motion Blur**: Directional blur synced to movement speed and direction.
+- **Clip A Axis / Direction Angle**: Controls how the incoming clip enters.
+- **Clip B Axis / Direction Angle**: Controls how the outgoing clip disappears (when moving).
+- **Clip B Behavior**: Static / Move / Fade.
+- **Speed Curve**: Higher % = stronger acceleration.
+- **Motion Blur**: Strength of directional blur.
+- **Edge Smoothing**: Smoothing out the edge pixels. On by default. (Note that it introduces dark edges on blurred clips due to Kdenlive's limitation.)
+- **Invert**: Invert the effect.
 
 ### Installation (Windows)
+
 1. Download the build from the release. The zip file should have `omni-swipe.dll` and `camerashakeorganic.xml`.
 2. Place `omni-swipe.dll` in Kdenlive frei0r plugins folder (e.g., kdenlive-master\lib\frei0r-1)
 3. Place `omni-swipe.xml` in Kdenlive effects folder (e.g., kdenlive-master\bin\data\kdenlive\transitions)
