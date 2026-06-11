@@ -9,26 +9,26 @@
         <name>Swipe position (progress)</name>
     </parameter>
 
-    <parameter type="list" name="axis1" default="0" paramlist="0;1;2">
-        <name>Clip 1 Axis</name>
+    <parameter type="list" name="axis_a" default="0" paramlist="0;1;2">
+        <name>Clip A Axis</name>
         <paramlistdisplay>+0,+90,+180</paramlistdisplay>
     </parameter>
 
-    <parameter type="double" name="direction_angle1" max="180" min="0" default="0">
-        <name>Clip 1 Axis Wheel</name>
+    <parameter type="double" name="wheel_a" max="180" min="0" default="0">
+        <name>Clip A Axis Wheel</name>
     </parameter>
 
-    <parameter type="list" name="axis2" default="0" paramlist="0;1;2">
-        <name>Clip 2 Axis</name>
+    <parameter type="list" name="axis_b" default="0" paramlist="0;1;2">
+        <name>Clip B Axis</name>
         <paramlistdisplay>+0,+90,+180</paramlistdisplay>
     </parameter>
 
-    <parameter type="double" name="direction_angle2" max="180" min="0" default="180">
-        <name>Clip 2 Axis Wheel</name>
+    <parameter type="double" name="wheel_b" max="180" min="0" default="180">
+        <name>Clip B Axis Wheel</name>
     </parameter>
 
-    <parameter type="list" name="clip2behavior" default="1" paramlist="0;1;2">
-        <name>Clip 2 Behavior</name>
+    <parameter type="list" name="clipb_behavior" default="1" paramlist="0;1;2">
+        <name>Clip B Behavior</name>
         <paramlistdisplay>Static,Move,Fade</paramlistdisplay>
     </parameter>
 
@@ -42,6 +42,14 @@
 
     <parameter type="double" name="motion_blur" max="100" min="0" default="0">
         <name>Motion Blur (%)</name>
+    </parameter>
+
+    <parameter type="bool" name="edge_smoothing" default="1">
+        <name>Edge Smoothing</name>
+    </parameter>
+
+    <parameter type="bool" name="invert" default="0">
+        <name>Invert</name>
     </parameter>
 
     <preview>
