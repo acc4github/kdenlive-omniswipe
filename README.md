@@ -8,7 +8,7 @@ An extremely versatile swipe transition plugin for Kdenlive. It's designed to co
 
 </p>
 
----
+
 ## Features
 
 - **Arrival Direction Axis / Wheel**: Controls how the incoming clip enters.
