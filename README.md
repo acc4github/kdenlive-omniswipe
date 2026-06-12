@@ -30,7 +30,7 @@ https://github.com/user-attachments/assets/0c9d8dac-b879-4fff-a40a-beea04f60fe1
 
 ## Installation (Windows)
 
-1. Download the build from the release. The zip file should have `omni-swipe.dll` and `camerashakeorganic.xml`.
+1. Download the build from the release. The zip file should have `omni-swipe.dll` and `omni-swipe.xml`.
 2. Place `omni-swipe.dll` in Kdenlive frei0r plugins folder (e.g., kdenlive-master\lib\frei0r-1)
 3. Place `omni-swipe.xml` in Kdenlive effects folder (e.g., kdenlive-master\bin\data\kdenlive\transitions)
 4. Restart Kdenlive. The transition should appear under "Transitions".
