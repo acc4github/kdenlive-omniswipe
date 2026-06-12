@@ -223,7 +223,7 @@ static void build_curve_lut(omni_swipe_t *inst) {
         for (int i = 0; i < CURVE_LUT_SIZE; ++i)
             inst->curve_lut[i] = i / (double)(CURVE_LUT_SIZE - 1);
     } else {
-        double exp_val = 1.0 + (c / 100.0) * 8.0;   // Map 0-100% → exponent 1..9
+        double exp_val = 1.0 + (c / 100.0) * 10;   // strength scaling.
         for (int i = 0; i < CURVE_LUT_SIZE; ++i) {
             double t = i / (double)(CURVE_LUT_SIZE - 1);
             inst->curve_lut[i] = pow(t, exp_val);
@@ -247,7 +247,7 @@ static double curve_lookup(const double *lut, double t) {
 
 /* Gentle arrival easing (used when speed_curve = 0) */
 static double reversed_linear(omni_swipe_t *inst, double t) {
-    double strength = 1.0 + (inst->gentle_arrival / 100.0) * 7.0;
+    double strength = 1.0 + (inst->gentle_arrival / 100.0) * 10; /* strength scaling */
     return 1.0 - pow(1.0 - t, strength);
 }
 

@@ -49,7 +49,7 @@
     </parameter>
 
     <parameter type="bool" name="invert" default="0">
-        <name>Invert (swap incoming and outgoing)</name>
+        <name>Invert</name>
     </parameter>
 
     <preview>
