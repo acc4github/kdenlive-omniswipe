@@ -4,7 +4,7 @@ An extremely versatile swipe transition plugin for Kdenlive. It's designed to co
 
 <p align="center">
 
-<img width="447" height="404" alt="kdenlive_b3yWCnnllB" src="https://github.com/user-attachments/assets/4bef2d51-d513-463d-b65c-f1da5736573e" />
+<img width="447" height="415" alt="kdenlive_MiB34PuMYO" src="https://github.com/user-attachments/assets/2d89b354-bc0d-4dd7-a2dd-b1509b8fdff5" />
 
 </p>
 
