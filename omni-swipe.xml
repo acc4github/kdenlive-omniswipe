@@ -2,33 +2,33 @@
 <!DOCTYPE kpartgui>
 <transition tag="frei0r.omni-swipe" id="frei0r.omni-swipe" type="videotransition">
     <name>OmniSwipe</name>
-    <description>A Swiss Army knife for swipe and slide transitions.</description>
+    <description>A Swiss Army knife for swipe and slide transitions. Arrival Direction controls the incoming clip; Departure Direction controls the outgoing clip.</description>
     <author>acc4commissions and Grok 4.3</author>
 
     <parameter type="animated" name="position" max="1000" min="0" default="0=0;%out=1" factor="1000">
         <name>Swipe position (progress)</name>
     </parameter>
 
-    <parameter type="list" name="axis_a" default="0" paramlist="0;1;2">
-        <name>Clip A Axis</name>
+    <parameter type="list" name="arrival_axis" default="0" paramlist="0;1;2">
+        <name>Arrival Direction Axis</name>
         <paramlistdisplay>+0,+90,+180</paramlistdisplay>
     </parameter>
 
-    <parameter type="double" name="wheel_a" max="180" min="0" default="0">
-        <name>Clip A Axis Wheel</name>
+    <parameter type="double" name="arrival_wheel" max="180" min="0" default="0">
+        <name>Arrival Direction Wheel</name>
     </parameter>
 
-    <parameter type="list" name="axis_b" default="0" paramlist="0;1;2">
-        <name>Clip B Axis</name>
+    <parameter type="list" name="departure_axis" default="0" paramlist="0;1;2">
+        <name>Departure Direction Axis</name>
         <paramlistdisplay>+0,+90,+180</paramlistdisplay>
     </parameter>
 
-    <parameter type="double" name="wheel_b" max="180" min="0" default="180">
-        <name>Clip B Axis Wheel</name>
+    <parameter type="double" name="departure_wheel" max="180" min="0" default="180">
+        <name>Departure Direction Wheel</name>
     </parameter>
 
-    <parameter type="list" name="clipb_behavior" default="1" paramlist="0;1;2">
-        <name>Clip B Behavior</name>
+    <parameter type="list" name="outgoing_behavior" default="1" paramlist="0;1;2">
+        <name>Outgoing Behavior</name>
         <paramlistdisplay>Static,Move,Fade</paramlistdisplay>
     </parameter>
 
@@ -44,12 +44,12 @@
         <name>Motion Blur (%)</name>
     </parameter>
 
-    <parameter type="bool" name="edge_smoothing" default="1">
+    <parameter type="bool" name="edge_smoothing" default="0">
         <name>Edge Smoothing</name>
     </parameter>
 
     <parameter type="bool" name="invert" default="0">
-        <name>Invert</name>
+        <name>Invert (swap incoming and outgoing)</name>
     </parameter>
 
     <preview>
