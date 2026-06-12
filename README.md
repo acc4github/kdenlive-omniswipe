@@ -31,17 +31,6 @@ An extremely versatile swipe transition plugin for Kdenlive. It's designed to co
 3. Place `omni-swipe.xml` in Kdenlive effects folder (e.g., kdenlive-master\bin\data\kdenlive\transitions)
 4. Restart Kdenlive. The transition should appear under "Transitions".
 
-## Usage
-
-- Drag the **OmniSwipe** transition onto the timeline between two clips. (A very short duration is recommended.)
-- Adjust parameters:
-  - **Clip 1 Axis / Wheel**: Controls the angle for the incoming clip.
-  - **Clip 2 Axis / Wheel**: Controls the angle for the outgoing clip (when moving).
-  - **Clip 2 Behavior**: Controls how the outgoing clip disappears -> Static / Move / Fade.
-  - **Speed Curve**: Higher % = stronger acceleration.
-  - **Gentle Arrival**: Higher % = stronger deceleration.
-  - **Motion Blur**: Strength of directional blur.
-
 ## License
 
 This project is licensed under the **GNU General Public License v3.0** (GPL-3.0).
