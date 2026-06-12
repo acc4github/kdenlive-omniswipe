@@ -24,7 +24,11 @@ An extremely versatile swipe transition plugin for Kdenlive. It's designed to co
   - **OFF**: The clip's boundaries are exactly snapped to its actual content.
 - **Invert**: Invert the effect.
 
-### Installation (Windows)
+## Demo
+
+https://github.com/user-attachments/assets/0c9d8dac-b879-4fff-a40a-beea04f60fe1
+
+## Installation (Windows)
 
 1. Download the build from the release. The zip file should have `omni-swipe.dll` and `camerashakeorganic.xml`.
 2. Place `omni-swipe.dll` in Kdenlive frei0r plugins folder (e.g., kdenlive-master\lib\frei0r-1)
