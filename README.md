@@ -26,7 +26,7 @@ An extremely versatile swipe transition plugin for Kdenlive. It's designed to co
 
 ## Demo
 
-https://github.com/user-attachments/assets/0c9d8dac-b879-4fff-a40a-beea04f60fe1
+https://github.com/user-attachments/assets/0c9560f9-8815-44d3-beac-87c5da322bf3
 
 ## Installation (Windows)
 
