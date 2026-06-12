@@ -15,7 +15,7 @@ An extremely versatile swipe transition plugin for Kdenlive. It's designed to co
 - **Departure Direction Axis / Wheel**: Controls how the outgoing clip disappears (when moving).
 - **Outgoing Behavior**: Static / Move / Fade.
 - **Speed Curve (%)**: Higher % = stronger acceleration.
-- **Gentle Arrival (%)**: Add smooth slowdown to the clip's movement. It switches between 2 mechanisms depending on Speed Curve's state.
+- **Gentle Arrival (%)**: Add smooth slowdown to the clip's movement. It switches between 2 mechanisms depending on the Speed Curve's state.
   - **When Speed Curve is at 0%**: Gentle Arrival acts like a reverse Speed Curve, adding a negative logarithmic curve to the speed. As you dial up Gentle Arrival, the curve will become stronger, and clips will start fast and decelerate towards the end. 
   - **When Speed Curve is used**: Gentle Arrival's intensity will symmetrically mirror Speed Curve's logarithmic curve. As you dial up Gentle Arrival, it will expand the 'effective zone' from the clip's end. The clips will start to slow down as the playback enters this zone. AT 100%, the entire clip is under Gentle Arrival's control.
 - **Motion Blur (%)**: Add directional blur to the moving clips. (The current motion blur is very low-res to prioritize performance. I didn't add controls for blur quality since I thought it was not that important, but I might later...)
